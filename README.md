@@ -16,7 +16,7 @@ the moment the website publishes them.
                         └── also publishes the live messages it receives, so other copies of this server get them
 ```
 
-- **No database, no encryption keys.** It never touches MongoDB. For each person it asks the website (signed with `RT_SECRET`) for their name,
+- **No database, no encryption keys.** It never touches MongoDB. For each person it asks the website (signed with `REALTIME_SECRET`) for their name,
   avatar and what they may do, and keeps the answer for 5 seconds. Saved changes still go to the website's API.
 - **Nothing to turn on here for the website to keep working.** The website only hands browsers this server's address when its `REALTIME_WS_URL` is
   set; a browser that cannot reach this server uses the plain stream, as before.
@@ -27,7 +27,7 @@ the moment the website publishes them.
 | Name | What |
 |---|---|
 | `SITE_URL` | The website's address (it is asked who people are). Required. |
-| `RT_SECRET` | **The same value as on the website.** Signs the tickets this server checks and the questions it asks. Required. |
+| `REALTIME_SECRET` | **This server's own secret, the same value as `REALTIME_SECRET` on the website** (at least 16 characters, e.g. `openssl rand -base64 32`). Signs the WebSocket tickets this server checks and the questions it asks. **Never the website's `RT_SECRET`**: the server refuses to start if that is set. Required. |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | **The same Upstash database as the website.** Required. |
 | `ALLOWED_ORIGINS` | Site addresses allowed to connect, comma separated. Default: `SITE_URL`. |
 | `PORT` | Default 8080. |
@@ -56,7 +56,7 @@ Fly.io, as an example:
 
 ```bash
 fly launch --copy-config --no-deploy          # uses fly.toml and the Dockerfile
-fly secrets set SITE_URL=https://your-website RT_SECRET=... UPSTASH_REDIS_REST_URL=... UPSTASH_REDIS_REST_TOKEN=... ALLOWED_ORIGINS=https://your-website
+fly secrets set SITE_URL=https://your-website REALTIME_SECRET=... UPSTASH_REDIS_REST_URL=... UPSTASH_REDIS_REST_TOKEN=... ALLOWED_ORIGINS=https://your-website
 fly deploy
 curl https://<app>.fly.dev/health
 ```
@@ -68,7 +68,7 @@ variable and redeploy: browsers go back to the plain stream.
 
 ## What it checks
 
-A connection needs a ticket the website issued for that person and board (HMAC, 30 minutes), an `Origin` in `ALLOWED_ORIGINS`, and the website's
+A connection needs a WebSocket ticket the website issued for that person and board (`wsTok`, HMAC with `REALTIME_SECRET`, 30 minutes), an `Origin` in `ALLOWED_ORIGINS`, and the website's
 answer that the person is in the board, not removed, and the link not revoked (the owner is exempt). Frames over 4 KB or binary frames close the
 connection; 30 live messages a second per person; throwing and celebrating follow the board's rules and limits (3 throws per 4.5 s, 1 celebration
 per 3 s); cursors and drags are dropped for a connection whose outgoing buffer is backed up. The sender of every message is the person the ticket
@@ -77,5 +77,5 @@ was issued to; the name and avatar come from the website, never from the message
 ## Keeping in step with the website
 
 Three things are copied from the website and pinned by tests on both sides (`test/vectors.test.mjs` here, `test/rt-authorize.test.mjs` there):
-the **ticket** format, the **signature** of the authorize question, and the **rules for live messages** (`src/rules.mjs`, the website's
+the **WebSocket ticket** format, the **signature** of the authorize question, and the **rules for live messages** (`src/rules.mjs`, the website's
 `lib/ephemeral.js`). If you change one on the website, change it here too; the known-answer tests fail on whichever side was forgotten.

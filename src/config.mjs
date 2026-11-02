@@ -11,7 +11,10 @@ const positive = (v, fallback) => (Number(v) > 0 ? Number(v) : fallback)
 export function loadConfig(env = process.env) {
   const problems = []
   const need = (name) => { const v = envValue(name, env); if (!v) problems.push(`${name} is not set`); return v }
-  const secret = need('RT_SECRET')
+  const secret = need('REALTIME_SECRET')
+  if (secret && secret.length < 16) problems.push('REALTIME_SECRET must be at least 16 characters (use a long random value)')
+  // The website's RT_SECRET signs guest cookies and every person's id on every board. This server must never hold it: it has its own secret.
+  if (envValue('RT_SECRET', env)) problems.push('RT_SECRET is set on this server and must not be: remove it (this server uses REALTIME_SECRET, a separate secret)')
   const upstashUrl = need('UPSTASH_REDIS_REST_URL')
   const upstashToken = need('UPSTASH_REDIS_REST_TOKEN')
   const siteRaw = need('SITE_URL')

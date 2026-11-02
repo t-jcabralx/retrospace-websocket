@@ -1,4 +1,4 @@
-// Asks the website about one person on one board. The question is signed with RT_SECRET (HMAC of 'rtauth:<ts>:<code>:<uid>', in the header
+// Asks the website about one person on one board. The question is signed with REALTIME_SECRET (HMAC of 'rtauth:<ts>:<code>:<uid>', in the header
 // x-rt-sig, with the time in x-rt-ts), so only this server can ask; it must stay identical to the website's lib/rtAuthorize.js.
 // Answers are kept for a few seconds so a busy board does not become a stream of questions.
 import { createHmac } from 'node:crypto'

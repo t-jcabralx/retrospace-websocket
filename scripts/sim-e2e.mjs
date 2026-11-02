@@ -33,11 +33,11 @@ async function guest(label) {
   const snap = await call('GET', `/api/boards/${code}`, undefined, jar)
   await call('PUT', `/api/boards/${code}/persona`, { persona: generatePersona() }, jar)
   const join = await call('POST', '/api/rt/join', { code }, jar)
-  return { label, jar, uid: snap.data.viewer.uid, tok: join.data.tok, ws: join.data.ws, cid: `c${randomBytes(6).toString('hex')}`, got: [] }
+  return { label, jar, uid: snap.data.viewer.uid, tok: join.data.wsTok, ws: join.data.ws, cid: `c${randomBytes(6).toString('hex')}`, got: [] }
 }
 const a = await guest('ann')
 const b = await guest('bob')
-check('the website hands out the realtime server\'s address with the ticket', typeof a.ws === 'string' && a.ws.startsWith('ws') && Boolean(a.tok), a.ws)
+check('the website hands out the realtime server\'s address with a ticket made for it', typeof a.ws === 'string' && a.ws.startsWith('ws') && /^\d{13}\.[0-9a-f]{32}$/.test(a.tok ?? ''), a.ws)
 
 function connect(g) {
   return new Promise((resolve, reject) => {
