@@ -55,6 +55,14 @@ It needs a host that **keeps a process running and accepts WebSocket connections
 may build and may even answer `GET /health`, but a browser can never keep a connection to it, so the website would quietly keep using its plain
 stream. Keep the website on Vercel and run this server somewhere else.
 
+## Checking a deployment
+
+- `GET /health` always answers, cheaply.
+- `GET /health?check=1` also checks the settings, that the website accepts this server's signature (so `REALTIME_SECRET` matches), and that Upstash answers.
+  It never returns a secret, only yes or no and what is wrong.
+- On Vercel the same address answers with `"websocket": false` and the same checks, so a deployment's settings can be verified there, but it cannot
+  take WebSocket connections (see above).
+
 ## Deploy
 
 Any host that keeps a process running and speaks WebSocket: Fly.io, Railway, Render, a VPS. **Keep at least one instance running at all times**

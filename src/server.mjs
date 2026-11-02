@@ -14,11 +14,16 @@ import { createRooms } from './rooms.mjs'
 export const CLOSE_RECONNECT = 4001 // "ask the website for a fresh ticket and connect again": the connection reached its age limit
 export const MAX_PAYLOAD = 4096 // bytes
 
-export function createRealtimeServer({ secret, facts, bus, allowedOrigins = [], maxConnections = 5000, maxLifetimeMs = 270_000, heartbeatMs = 25_000, instance = randomUUID().slice(0, 8), now = Date.now, log = console }) {
+export function createRealtimeServer({ secret, facts, bus, allowedOrigins = [], maxConnections = 5000, maxLifetimeMs = 270_000, heartbeatMs = 25_000, check = null, instance = randomUUID().slice(0, 8), now = Date.now, log = console }) {
   const app = express()
   app.disable('x-powered-by')
   const startedAt = now()
-  app.get('/health', (req, res) => res.json({ ok: true, instance, connections: rooms.size(), rooms: rooms.roomCount(), uptimeSeconds: Math.round((now() - startedAt) / 1000) }))
+  // /health is cheap and always answers; /health?check=1 also checks the settings, the website link and Upstash (see diagnose.mjs).
+  app.get('/health', async (req, res) => {
+    const base = { ok: true, instance, websocket: true, connections: rooms.size(), rooms: rooms.roomCount(), uptimeSeconds: Math.round((now() - startedAt) / 1000) }
+    if (req.query.check === '1' && check) return res.set('Cache-Control', 'no-store').json({ ...base, checks: await check() })
+    res.json(base)
+  })
   app.get('/', (req, res) => res.type('text/plain').send('Retrospace realtime server\n'))
   app.use((req, res) => res.status(404).end())
 
