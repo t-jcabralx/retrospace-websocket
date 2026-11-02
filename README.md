@@ -47,6 +47,14 @@ node scripts/sim-e2e.mjs https://your-website   # the website, this server and U
 
 `GET /health` answers `{"ok":true,"connections":…,"rooms":…}`.
 
+## Where it can and cannot run
+
+It needs a host that **keeps a process running and accepts WebSocket connections**: Fly.io, Railway, Render, a VPS, any container host.
+
+**Vercel cannot host it.** Vercel runs code as short-lived serverless functions, which cannot hold a WebSocket open. A Vercel deployment of this repository
+may build and may even answer `GET /health`, but a browser can never keep a connection to it, so the website would quietly keep using its plain
+stream. Keep the website on Vercel and run this server somewhere else.
+
 ## Deploy
 
 Any host that keeps a process running and speaks WebSocket: Fly.io, Railway, Render, a VPS. **Keep at least one instance running at all times**
