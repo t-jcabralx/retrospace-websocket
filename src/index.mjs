@@ -19,7 +19,8 @@ export default onVercel
   ? createStatusApp({ config, configError, runtime: 'vercel', redis: config ? new Redis({ url: config.upstash.url, token: config.upstash.token }) : null })
   : undefined
 
-if (!onVercel) await start()
+// No top-level await: it would make this an async module, which a serverless runtime cannot load.
+if (!onVercel) start().catch((e) => { console.error(e); process.exit(1) })
 
 async function start() {
   const rt = createRealtimeServer({
