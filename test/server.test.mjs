@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { WebSocket } from 'ws'
-import { createRealtimeServer, CLOSE_RECONNECT } from '../src/server.mjs'
+import { createRealtimeServer, CLOSE_RECONNECT } from '../src/wsServer.mjs'
 import { createMemoryBus } from '../src/bus.mjs'
 import { signTicket } from '../src/ticket.mjs'
 

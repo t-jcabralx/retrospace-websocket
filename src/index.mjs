@@ -1,6 +1,6 @@
 // Starts the realtime server from the environment (see .env.example).
 import { loadConfig } from './config.mjs'
-import { createRealtimeServer } from './server.mjs'
+import { createRealtimeServer } from './wsServer.mjs'
 import { createUpstashBus } from './bus.mjs'
 import { createSiteAuth } from './siteAuth.mjs'
 import { createStatusApp } from './status.mjs'

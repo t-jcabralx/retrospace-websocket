@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import http from 'node:http'
 import { diagnose } from '../src/diagnose.mjs'
 import { createStatusApp } from '../src/status.mjs'
-import { createRealtimeServer } from '../src/server.mjs'
+import { createRealtimeServer } from '../src/wsServer.mjs'
 import { createMemoryBus } from '../src/bus.mjs'
 import { authorizeSignature } from '../src/siteAuth.mjs'
 
